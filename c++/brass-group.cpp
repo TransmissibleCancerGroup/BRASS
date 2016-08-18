@@ -455,7 +455,7 @@ try {
   static const char usage[] =
 "Usage: brass-group [OPTION]... FILE [FILE] [FILE]\n"
 "Options:\n"
-"  -d TYPE    Discard read pairs or groups matching condition TYPE\n"
+"  -d TYPE    Biscard read pairs or groups matching condition TYPE\n"
 "  -F FILE    Read annotation features from FILE (in BED or range format)\n"
 "  -i RANGE   Omit groups in or near the locations encompassed by RANGE\n"
 "  -I FILE      ...or locations encompassed by ranges listed in FILE\n"
@@ -510,7 +510,7 @@ try {
     }
 
   int nfiles = argc - optind;
-  if (nfiles == 0 || nfiles > 3) { std::cerr << usage; return EXIT_FAILURE; }
+  if (nfiles == 0 || nfiles > 9) { std::cerr << usage; return EXIT_FAILURE; }
 
   isamstream in(argv[optind]);
   if (! in.is_open())
@@ -545,7 +545,7 @@ try {
     grouper.group_alignments(merged);
     grouper.print_trailer();
   }
-  else {
+  else if (nfiles == 3) {
     isamstream in2(argv[optind+1]);
     if (! in2.is_open())
       throw sam::system_error("can't open ", argv[optind+1], errno);
@@ -563,6 +563,250 @@ try {
     grouper.print_preamble(headers, preamble.str());
     grouper.group_alignments(merged);
     grouper.print_trailer();
+  }
+  else if (nfiles == 4) {
+    isamstream in2(argv[optind+1]);
+    if (! in2.is_open())
+      throw sam::system_error("can't open ", argv[optind+1], errno);
+    in2.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in3(argv[optind+2]);
+    if (! in3.is_open())
+      throw sam::system_error("can't open ", argv[optind+2], errno);
+    in3.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in4(argv[optind+3]);
+      if (! in4.is_open())
+        throw sam::system_error("can't open ", argv[optind+3], errno);
+    in4.exceptions(std::ios::failbit | std::ios::badbit);
+
+    imergestream<> merged34(in3, in4);
+    imergestream<imergestream<> > merged234(in2, merged34);
+    imergestream<imergestream<imergestream<> > > merged(in, merged234);
+    merged >> headers;
+    rearrangement_grouper grouper(opt, headers);
+    grouper.print_preamble(headers, preamble.str());
+    grouper.group_alignments(merged);
+    grouper.print_trailer();
+  }
+  else if (nfiles == 5) {
+    isamstream in2(argv[optind+1]);
+    if (! in2.is_open())
+      throw sam::system_error("can't open ", argv[optind+1], errno);
+    in2.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in3(argv[optind+2]);
+    if (! in3.is_open())
+      throw sam::system_error("can't open ", argv[optind+2], errno);
+    in3.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in4(argv[optind+3]);
+      if (! in4.is_open())
+        throw sam::system_error("can't open ", argv[optind+3], errno);
+    in4.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in5(argv[optind+4]);
+      if (! in5.is_open())
+        throw sam::system_error("can't open ", argv[optind+4], errno);
+    in5.exceptions(std::ios::failbit | std::ios::badbit);
+
+    imergestream<> merged45(in4, in5);
+    imergestream<imergestream<> > merged345(in3, merged45);
+    imergestream<imergestream<imergestream<> > > merged2345(in2, merged345);
+    imergestream<imergestream<imergestream<imergestream<> > > > merged(in, merged2345);
+    merged >> headers;
+    rearrangement_grouper grouper(opt, headers);
+    grouper.print_preamble(headers, preamble.str());
+    grouper.group_alignments(merged);
+    grouper.print_trailer();
+  }
+  else if (nfiles == 6) {
+    isamstream in2(argv[optind+1]);
+    if (! in2.is_open())
+      throw sam::system_error("can't open ", argv[optind+1], errno);
+    in2.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in3(argv[optind+2]);
+    if (! in3.is_open())
+      throw sam::system_error("can't open ", argv[optind+2], errno);
+    in3.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in4(argv[optind+3]);
+      if (! in4.is_open())
+        throw sam::system_error("can't open ", argv[optind+3], errno);
+    in4.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in5(argv[optind+4]);
+      if (! in5.is_open())
+        throw sam::system_error("can't open ", argv[optind+4], errno);
+    in5.exceptions(std::ios::failbit | std::ios::badbit);
+
+    isamstream in6(argv[optind+5]);
+      if (! in6.is_open())
+        throw sam::system_error("can't open ", argv[optind+5], errno);
+    in6.exceptions(std::ios::failbit | std::ios::badbit);
+
+    imergestream<> merged56(in5, in6);
+    imergestream<imergestream<> > merged456(in4, merged56);
+    imergestream<imergestream<imergestream<> > > merged3456(in3, merged456);
+    imergestream<imergestream<imergestream<imergestream<> > > > merged23456(in2, merged3456);
+    imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > merged(in, merged23456);
+    merged >> headers;
+    rearrangement_grouper grouper(opt, headers);
+    grouper.print_preamble(headers, preamble.str());
+    grouper.group_alignments(merged);
+    grouper.print_trailer();
+  }
+  else if (nfiles == 7) {
+      isamstream in2(argv[optind+1]);
+      if (! in2.is_open())
+          throw sam::system_error("can't open ", argv[optind+1], errno);
+      in2.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in3(argv[optind+2]);
+      if (! in3.is_open())
+          throw sam::system_error("can't open ", argv[optind+2], errno);
+      in3.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in4(argv[optind+3]);
+      if (! in4.is_open())
+          throw sam::system_error("can't open ", argv[optind+3], errno);
+      in4.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in5(argv[optind+4]);
+      if (! in5.is_open())
+          throw sam::system_error("can't open ", argv[optind+4], errno);
+      in5.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in6(argv[optind+5]);
+      if (! in6.is_open())
+          throw sam::system_error("can't open ", argv[optind+5], errno);
+      in6.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in7(argv[optind+6]);
+      if (! in7.is_open())
+          throw sam::system_error("can't open ", argv[optind+6], errno);
+      in7.exceptions(std::ios::failbit | std::ios::badbit);
+
+    imergestream<> merged67(in6, in7);
+    imergestream<imergestream<> > merged567(in5, merged67);
+    imergestream<imergestream<imergestream<> > > merged4567(in4, merged567);
+    imergestream<imergestream<imergestream<imergestream<> > > > merged34567(in3, merged4567);
+    imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > merged234567(in2, merged34567);
+    imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > > merged(in, merged234567);
+    merged >> headers;
+    rearrangement_grouper grouper(opt, headers);
+    grouper.print_preamble(headers, preamble.str());
+    grouper.group_alignments(merged);
+    grouper.print_trailer();
+
+  }
+  else if (nfiles == 8) {
+      isamstream in2(argv[optind+1]);
+      if (! in2.is_open())
+          throw sam::system_error("can't open ", argv[optind+1], errno);
+      in2.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in3(argv[optind+2]);
+      if (! in3.is_open())
+          throw sam::system_error("can't open ", argv[optind+2], errno);
+      in3.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in4(argv[optind+3]);
+      if (! in4.is_open())
+          throw sam::system_error("can't open ", argv[optind+3], errno);
+      in4.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in5(argv[optind+4]);
+      if (! in5.is_open())
+          throw sam::system_error("can't open ", argv[optind+4], errno);
+      in5.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in6(argv[optind+5]);
+      if (! in6.is_open())
+          throw sam::system_error("can't open ", argv[optind+5], errno);
+      in6.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in7(argv[optind+6]);
+      if (! in7.is_open())
+          throw sam::system_error("can't open ", argv[optind+6], errno);
+      in7.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in8(argv[optind+7]);
+      if (! in8.is_open())
+          throw sam::system_error("can't open ", argv[optind+7], errno);
+      in8.exceptions(std::ios::failbit | std::ios::badbit);
+      
+    imergestream<> merged78(in7, in8);
+    imergestream<imergestream<> > merged678(in6, merged78);
+    imergestream<imergestream<imergestream<> > > merged5678(in5, merged678);
+    imergestream<imergestream<imergestream<imergestream<> > > > merged45678(in4, merged5678);
+    imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > merged345678(in3, merged45678);
+    imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > > merged2345678(in2, merged345678);
+    imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > > > merged(in, merged2345678);
+    merged >> headers;
+    rearrangement_grouper grouper(opt, headers);
+    grouper.print_preamble(headers, preamble.str());
+    grouper.group_alignments(merged);
+    grouper.print_trailer();
+
+  }  else if (nfiles == 9) {
+      isamstream in2(argv[optind+1]);
+      if (! in2.is_open())
+          throw sam::system_error("can't open ", argv[optind+1], errno);
+      in2.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in3(argv[optind+2]);
+      if (! in3.is_open())
+          throw sam::system_error("can't open ", argv[optind+2], errno);
+      in3.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in4(argv[optind+3]);
+      if (! in4.is_open())
+          throw sam::system_error("can't open ", argv[optind+3], errno);
+      in4.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in5(argv[optind+4]);
+      if (! in5.is_open())
+          throw sam::system_error("can't open ", argv[optind+4], errno);
+      in5.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in6(argv[optind+5]);
+      if (! in6.is_open())
+          throw sam::system_error("can't open ", argv[optind+5], errno);
+      in6.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in7(argv[optind+6]);
+      if (! in7.is_open())
+          throw sam::system_error("can't open ", argv[optind+6], errno);
+      in7.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in8(argv[optind+7]);
+      if (! in8.is_open())
+          throw sam::system_error("can't open ", argv[optind+7], errno);
+      in8.exceptions(std::ios::failbit | std::ios::badbit);
+
+      isamstream in9(argv[optind+8]);
+      if (! in9.is_open())
+          throw sam::system_error("can't open ", argv[optind+8], errno);
+      in9.exceptions(std::ios::failbit | std::ios::badbit);
+
+    imergestream<> merged89(in8, in9);
+    imergestream<imergestream<> > merged789(in7, merged89);
+    imergestream<imergestream<imergestream<> > > merged6789(in6, merged789);
+    imergestream<imergestream<imergestream<imergestream<> > > > merged56789(in5, merged6789);
+    imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > merged456789(in4, merged56789);
+    imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > > merged3456789(in3, merged456789);
+    imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > > > merged23456789(in2, merged3456789);
+    imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<imergestream<> > > > > > > > merged(in, merged23456789);
+    merged >> headers;
+    rearrangement_grouper grouper(opt, headers);
+    grouper.print_preamble(headers, preamble.str());
+    grouper.group_alignments(merged);
+    grouper.print_trailer();
+
+  } else {
+      std::cout << "Support for >9 files coming soon!" << std::endl;
   }
 
   return EXIT_SUCCESS;
