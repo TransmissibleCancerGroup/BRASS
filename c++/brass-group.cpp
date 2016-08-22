@@ -453,9 +453,9 @@ try {
 "";
 
   static const char usage[] =
-"Usage: brass-group [OPTION]... FILE [FILE] [FILE]\n"
+"Usage: brass-group [OPTION]... FILE [FILE] [FILE]...\n"
 "Options:\n"
-"  -d TYPE    Biscard read pairs or groups matching condition TYPE\n"
+"  -d TYPE    Discard read pairs or groups matching condition TYPE\n"
 "  -F FILE    Read annotation features from FILE (in BED or range format)\n"
 "  -i RANGE   Omit groups in or near the locations encompassed by RANGE\n"
 "  -I FILE      ...or locations encompassed by ranges listed in FILE\n"
@@ -469,6 +469,7 @@ try {
 "  insertion  Intrachromosomal insertions smaller than the insert (discarded)\n"
 "  repeat     Groups touching listed repeat features (discarded)\n"
 "  repetitive Read pairs marked as repetitively mapped (kept)\n"
+"Maximum number of input BAM files: 9\n"
 "";
 
   if (argc >= 2) {
@@ -736,7 +737,7 @@ try {
       if (! in8.is_open())
           throw sam::system_error("can't open ", argv[optind+7], errno);
       in8.exceptions(std::ios::failbit | std::ios::badbit);
-      
+
     imergestream<> merged78(in7, in8);
     imergestream<imergestream<> > merged678(in6, merged78);
     imergestream<imergestream<imergestream<> > > merged5678(in5, merged678);
