@@ -453,7 +453,7 @@ try {
 "";
 
   static const char usage[] =
-"BRASS-GROUP with experimental support for multiple inputs"
+"BRASS-GROUP with experimental support for multiple inputs\n"
 "Usage: brass-group [OPTION]... FILE [FILE] [FILE]...\n"
 "Options:\n"
 "  -d TYPE    Discard read pairs or groups matching condition TYPE\n"
