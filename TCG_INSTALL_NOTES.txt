@@ -1,0 +1,26 @@
+Installing BRASS on the farm
+
+
+Install htslib from the Samtools git repo: https://github.com/samtools/htslib.git
+
+
+BRASS needs access to some perl modules. Mostly these live in /software/CGP/pancan/lib/perl5. Module Bio::DB::HTS is missing, however.
+
+
+Need to install Bio::DB::HTS into ~/.perl:
+1. Download from http://search.cpan.org/dist/Bio-DB-HTS/ using wget or curl
+2. Run perl Build.PL --install_base ~/.perl
+3. Run Build && Build test && Build install
+
+
+Need to set environment variable CGP_PERLLIBS to point BRASS to its required perl modules
+  export CGP_PERLLIBS=/software/CGP/pancan/lib/perl5:$HOME/.perl/lib/perl5:$CGP_PERLLIBS
+
+
+In BRASS directory:
+- bash setup.sh installation/path
+
+The setup script builds Velvet, Blat and Exonerate. Normally, these builds are deleted at the end of installation. You can comment out this line (line ~310) in setup.sh to prevent them being deleted. This speeds up future rebuilds of BRASS.
+
+rm -rf $SETUP_DIR
+
