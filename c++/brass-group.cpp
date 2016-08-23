@@ -49,7 +49,7 @@
 #include "cansam/intervalmap.h"
 
 #include "feature.h"
-#include "imergestream.h"
+#include "imergenode.h"
 #include "rearrgroup.h"
 #include "version.inc"
 
@@ -444,7 +444,7 @@ void rearrangement_grouper::group_alignments(InputSamStream& in) {
 
 int main(int argc, char** argv)
 try {
-  static const char version[] = "brass-group (Brass) " BRASS_VERSION;
+  static const char version[] = "brass-group (Brass) " BRASS_VERSION " [Multiple Inputs]";
 
   static const char copyright[] =
 "Copyright (C) 2013 Genome Research Ltd.\n"
@@ -453,7 +453,8 @@ try {
 "";
 
   static const char usage[] =
-"Usage: brass-group [OPTION]... FILE [FILE] [FILE]\n"
+"BRASS-GROUP with experimental support for multiple inputs"
+"Usage: brass-group [OPTION]... FILE [FILE] [FILE]...\n"
 "Options:\n"
 "  -d TYPE    Discard read pairs or groups matching condition TYPE\n"
 "  -F FILE    Read annotation features from FILE (in BED or range format)\n"
@@ -510,7 +511,7 @@ try {
     }
 
   int nfiles = argc - optind;
-  if (nfiles == 0 || nfiles > 3) { std::cerr << usage; return EXIT_FAILURE; }
+  if (nfiles == 0) { std::cerr << usage; return EXIT_FAILURE; }
 
   isamstream in(argv[optind]);
   if (! in.is_open())
@@ -532,39 +533,41 @@ try {
     grouper.group_alignments(in);
     grouper.print_trailer();
   }
-  else if (nfiles == 2) {
-    isamstream in2(argv[optind+1]);
-    if (! in2.is_open())
-      throw sam::system_error("can't open ", argv[optind+1], errno);
-    in2.exceptions(std::ios::failbit | std::ios::badbit);
-
-    imergestream<> merged(in, in2);
-    merged >> headers;
-    rearrangement_grouper grouper(opt, headers);
-    grouper.print_preamble(headers, preamble.str());
-    grouper.group_alignments(merged);
-    grouper.print_trailer();
-  }
   else {
-    isamstream in2(argv[optind+1]);
-    if (! in2.is_open())
-      throw sam::system_error("can't open ", argv[optind+1], errno);
-    in2.exceptions(std::ios::failbit | std::ios::badbit);
+    // Open multiple files and insert them into a linked list.
+    // The list is made of imergenodes - a class based on the
+    // imergestream.
 
-    isamstream in3(argv[optind+2]);
-    if (! in3.is_open())
-      throw sam::system_error("can't open ", argv[optind+2], errno);
-    in3.exceptions(std::ios::failbit | std::ios::badbit);
+    // Open the first file and return a pointer
+    isamstream* file1p = new isamstream(argv[optind]);
+    if(!file1p->is_open()) {
+      throw sam::system_error("can't open ", argv[optind], errno);
+    }
+    file1p->exceptions(std::ios::failbit|std::ios::badbit);
 
-    imergestream<> merged23(in2, in3);
-    imergestream<imergestream<> > merged(in, merged23);
-    merged >> headers;
+    // Create first imergenode of linked list
+    imergenode* head = new imergenode(file1p);
+    imergenode* tail = head;
+
+    // Open remaining files and insert into list
+    for (int i = optind+1; i < argc; i++) {
+      // open the next file, and do checks
+      isamstream* filep = new isamstream(argv[i]);
+      if(!filep->is_open()) {
+        throw sam::system_error("can't open ", argv[i], errno);
+      }
+      filep->exceptions(std::ios::failbit | std::ios::badbit);
+
+      // insert into linked list
+      tail = tail->append(filep);
+    }
+    (*head) >> headers;
     rearrangement_grouper grouper(opt, headers);
     grouper.print_preamble(headers, preamble.str());
-    grouper.group_alignments(merged);
+    grouper.group_alignments(*head);
     grouper.print_trailer();
+    delete head;
   }
-
   return EXIT_SUCCESS;
 }
 catch (const std::exception& e) {
