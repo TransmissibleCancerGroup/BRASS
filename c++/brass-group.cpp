@@ -149,6 +149,7 @@ private:
   bool discard_apparent_insertions;
   bool discard_within_repeats;
   bool discard_repeat_mapped;
+  bool discard_duplicates;
   int min_count;
   int min_quality;
 
@@ -157,10 +158,10 @@ private:
 
   struct {
     unsigned long total, proper, unmapped, low_quality, repeats, repetitive,
-		  ignored, insertion, near_mate;
+		  ignored, insertion, near_mate, duplicates;
     void clear()
       { total = proper = unmapped = low_quality = repeats = repetitive =
-	  ignored = insertion = near_mate = 0; }
+	  ignored = insertion = near_mate = duplicates = 0; }
   } read_stats;
 
   struct {
@@ -192,6 +193,7 @@ rearrangement_grouper::rearrangement_grouper(const options& opt,
     discard_apparent_insertions(opt.discards.find("insertion")->second),
     discard_within_repeats(opt.discards.find("repeat")->second),
     discard_repeat_mapped(opt.discards.find("repetitive")->second),
+    discard_duplicates(opt.discards.find("duplicates")->second),
     min_count(opt.min_count),
     min_quality(opt.min_quality),
     outfile(),
@@ -264,6 +266,8 @@ void rearrangement_grouper::print_trailer() {
 
   if (min_quality > 0)
     out<<"#   Low quality:\t" << read_stats.low_quality << '\n';
+  if (discard_duplicates)
+    out<<"#   Marked duplicates:\t" << read_stats.duplicates << '\n';
   if (discard_apparent_insertions)
     out<<"#   Small insertion:\t" << read_stats.insertion << '\n';
   if (discard_within_repeats)
@@ -366,6 +370,7 @@ void rearrangement_grouper::group_alignments(InputSamStream& in) {
     read_stats.total++;
 
     int flags = aln.flags();
+    if (discard_duplicates && (flags & DUPLICATE)) { read_stats.duplicates++; continue; }
     if (flags & PROPER_PAIRED) { read_stats.proper++; continue; }
     if (flags & (UNMAPPED|MATE_UNMAPPED)) { read_stats.unmapped++; continue; }
     if (aln.mapq() < min_quality) { read_stats.low_quality++; continue; }
@@ -453,23 +458,24 @@ try {
 "";
 
   static const char usage[] =
-"BRASS-GROUP with experimental support for multiple inputs\n"
+"BRASS-GROUP with support for multiple inputs and skipping marked duplicates\n"
 "Usage: brass-group [OPTION]... FILE [FILE] [FILE]...\n"
 "Options:\n"
-"  -d TYPE    Discard read pairs or groups matching condition TYPE\n"
+"  -d TYPE    Discard read pairs or groups matching condition TYPE (see below)\n"
+"  -k TYPE    Keep read pairs or groups matching condition TYPE (see below)\n"
 "  -F FILE    Read annotation features from FILE (in BED or range format)\n"
 "  -i RANGE   Omit groups in or near the locations encompassed by RANGE\n"
 "  -I FILE      ...or locations encompassed by ranges listed in FILE\n"
-"  -k TYPE    Keep read pairs or groups matching condition TYPE\n"
 "  -m NUM     Use maximum insert size NUM unless specified by the library\n"
 "  -n NUM     Omit groups containing fewer than NUM read pairs (default 2)\n"
 "  -o FILE    Write rearrangement groups to FILE rather than standard output\n"
 "  -q NUM     Discard read pairs with mapping quality less than NUM (default 1)\n"
 "  -s NAME    Use sample NAME for read pairs that are not in any read group\n"
 "Conditions:\n"
-"  insertion  Intrachromosomal insertions smaller than the insert (discarded)\n"
-"  repeat     Groups touching listed repeat features (discarded)\n"
-"  repetitive Read pairs marked as repetitively mapped (kept)\n"
+"  duplicates Reads marked as duplicates (default kept)\n"
+"  insertion  Intrachromosomal insertions smaller than the insert (default discarded)\n"
+"  repeat     Groups touching listed repeat features (default discarded)\n"
+"  repetitive Read pairs marked as repetitively mapped (default kept)\n"
 "";
 
   if (argc >= 2) {
@@ -484,6 +490,7 @@ try {
   opt.max_insert = -1;  // an error if a read group needs to fall back to this
   opt.min_count = 2;
   opt.min_quality = 1;
+  opt.discards["duplicates"] = false;
   opt.discards["insertion"] = true;
   opt.discards["repeat"] = true;
   opt.discards["repetitive"] = false;
