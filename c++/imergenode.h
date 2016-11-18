@@ -78,13 +78,54 @@ public:
         // FIXME Merge the headers; need to rebase the alignments onto merged hdrs
         //headers.merge(h2);
         if (headers.ref_size() != h2.ref_size()) {
-            throw "files have different numbers of references";
+            std::cout << "WARNING: files have different numbers of references, "
+                      << headers.ref_size() << " and " << h2.ref_size() << std::endl;
         }
-        for (sam::collection::ref_iterator it = headers.ref_begin(), it2 = h2.ref_begin(); it != headers.ref_end(); ++it, ++it2) {
-          if (it->name() != it2->name() || it->length() != it2->length()) {
-            throw "files have a differing reference";
+        //else {
+          // std::cout << "Files have the same number of references, "
+                    // << headers.ref_size() << " and " << h2.ref_size() << std::endl;
+        // }
+        // Which is the shorter?
+        sam::collection::ref_iterator it = headers.ref_begin();
+        sam::collection::ref_iterator it2 = h2.ref_begin();
+        bool should_throw = false;
+        if (headers.ref_size() > h2.ref_size()) {
+          for (; it2 != h2.ref_end(); ++it, ++it2) {
+            if (it->name() != it2->name() || it->length() != it2->length()) {
+              // std::cout << ".." << it->name() << ", " << it2->name() << std::endl;
+              // std::cout << ".." << it->length() << ", " << it2->length() << std::endl;
+              should_throw = true;
+            }
           }
+          for (; it != headers.ref_end(); ++it) {
+            std::cout << "--" << it->name() << "\n";
+            std::cout << "--" << it->length() << std::endl;
+          }
+          if (should_throw) throw "files have a differing reference";
         }
+        else {
+          for (; it != headers.ref_end(); ++it, ++it2) {
+            if (it->name() != it2->name() || it->length() != it2->length()) {
+              // std::cout << "**" << it->name() << ", " << it2->name() << std::endl;
+              // std::cout << "**" << it->length() << ", " << it2->length() << std::endl;
+              should_throw = true;
+            }
+          }
+
+          for (; it2 != h2.ref_end(); ++it2) {
+            std::cout << "++" << it2->name() << "\n";
+            std::cout << "++" << it2->length() << std::endl;
+          }
+          if (should_throw) throw "files have a differing reference";
+        }
+        // for (sam::collection::ref_iterator it = headers.ref_begin(), it2 = h2.ref_begin(); it != iter_end(); ++it, ++it2) {
+          // bool should_throw = false;
+          // if (it->name() != it2->name() || it->length() != it2->length()) {
+            // should_throw = true;
+          // }
+        // }
+        // if (should_throw) throw "files have a differing reference";
+
 
         // FIXME HACK Merge in the RG headers
         // FIXME should be const_iterator but weird pit thing
